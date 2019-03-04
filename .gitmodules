@@ -1,0 +1,3 @@
+[submodule "hactool"]
+	path = hactool
+	url = https://github.com/SciresM/hactool.git
