@@ -19,7 +19,11 @@ fn main() {
     }
     build.compile("libhactool.a");
     
-    let bindings = bindgen::Builder::default()
+    let bindings = if let Ok(sysroot) = std::env::var("BINDGEN_SYSROOT") {
+            bindgen::Builder::default().clang_arg(format!("--sysroot={}", sysroot))
+        } else {
+            bindgen::Builder::default()
+        }
         .clang_arg("-Ihactool")
         .clang_arg("-Ihactool/mbedtls/include")
         .header("wrapper.h")
