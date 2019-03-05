@@ -18,20 +18,36 @@ fn main() {
         }
     }
     build.compile("libhactool.a");
-    
-    let bindings = if let Ok(sysroot) = std::env::var("BINDGEN_SYSROOT") {
-            bindgen::Builder::default().clang_arg(format!("--sysroot={}", sysroot))
-        } else {
-            bindgen::Builder::default()
-        }
-        .clang_arg("-Ihactool")
-        .clang_arg("-Ihactool/mbedtls/include")
-        .header("wrapper.h")
-        .default_enum_style(bindgen::EnumVariation::Rust)
-        .blacklist_type("FILE")
-        .raw_line("pub type FILE = libc::FILE;")
-        .generate()
-        .expect("Couldn't generate bindings!");
+
+    let bindings = if let Ok(_) = std::env::var("BINDGEN_LIBNX") {
+        bindgen::Builder::default()
+            .trust_clang_mangling(false)
+            .rust_target(bindgen::RustTarget::Nightly)
+            .ctypes_prefix("lang_items")
+            .header("wrapper.h")
+            .clang_arg("-I/opt/devkitpro/libnx/include")
+            .clang_arg("-I/opt/devkitpro/devkitA64/aarch64-none-elf/include")
+            .clang_arg("-I/opt/devkitpro/devkitA64/lib/gcc/aarch64-none-elf/8.2.0/include")
+			.default_enum_style(bindgen::EnumVariation::Rust)
+            .blacklist_type("u8")
+            .blacklist_type("u16")
+            .blacklist_type("u32")
+            .blacklist_type("u64")
+			.blacklist_type("FILE")
+			.raw_line("pub type FILE = libc::FILE;")
+            .generate()
+			.expect("Couldn't generate bindings!")
+    } else {
+		bindgen::Builder::default()
+			.clang_arg("-Ihactool")
+			.clang_arg("-Ihactool/mbedtls/include")
+			.header("wrapper.h")
+			.default_enum_style(bindgen::EnumVariation::Rust)
+			.blacklist_type("FILE")
+			.raw_line("pub type FILE = libc::FILE;")
+			.generate()
+			.expect("Couldn't generate bindings!")
+	};
 
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
     bindings
