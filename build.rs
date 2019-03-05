@@ -22,7 +22,6 @@ fn main() {
     let bindings = if let Ok(_) = std::env::var("BINDGEN_LIBNX") {
         bindgen::Builder::default()
             .trust_clang_mangling(false)
-            .rust_target(bindgen::RustTarget::Nightly)
             .clang_arg("-I/opt/devkitpro/libnx/include")
             .clang_arg("-I/opt/devkitpro/devkitA64/aarch64-none-elf/include")
             .clang_arg("-I/opt/devkitpro/devkitA64/lib/gcc/aarch64-none-elf/8.2.0/include")
@@ -34,6 +33,7 @@ fn main() {
             .blacklist_type("u16")
             .blacklist_type("u32")
             .blacklist_type("u64")
+            .blacklist_type("__va_list")
 			.blacklist_type("FILE")
             .opaque_type("__.*")
 			.raw_line("pub type FILE = libc::FILE;")
