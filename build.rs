@@ -6,6 +6,7 @@ use std::fs::read_dir;
 
 fn main() {
     let mut build = cc::Build::new();
+    build.warnings(false);
     build.include("hactool");
     build.include("hactool/mbedtls/include");
     for ent in read_dir("hactool/mbedtls/library/").unwrap().chain(read_dir("hactool/").unwrap()) {
@@ -16,12 +17,15 @@ fn main() {
             }
         }
     }
-    build.compile("libhac.a");
+    build.compile("libhactool.a");
     
     let bindings = bindgen::Builder::default()
         .clang_arg("-Ihactool")
         .clang_arg("-Ihactool/mbedtls/include")
         .header("wrapper.h")
+        .default_enum_style(bindgen::EnumVariation::Rust)
+        .blacklist_type("FILE")
+        .raw_line("pub type FILE = libc::FILE;")
         .generate()
         .expect("Couldn't generate bindings!");
 
