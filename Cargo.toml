@@ -1,6 +1,6 @@
 [package]
 name = "hactool-sys"
-version = "0.3.0"
+version = "0.3.1"
 license = "ISC"
 authors = ["leo60228 <iakornfeld@gmail.com>"]
 edition = "2018"
