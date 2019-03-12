@@ -7,17 +7,15 @@ use std::fs::read_dir;
 fn main() {
     let mut build = cc::Build::new();
     build.warnings(false);
-    build.include("hactool");
-    build.include("hactool/mbedtls/include");
-    for ent in read_dir("hactool/mbedtls/library/").unwrap().chain(read_dir("hactool/").unwrap()) {
+    build.include("fatfs/source");
+    for ent in read_dir("fatfs/source").unwrap() {
         if let Ok(ent) = ent {
-            if ent.path().extension().map(|e| e.to_string_lossy() == "c").unwrap_or(false) &&
-               ent.path().file_name().map(|e| e.to_string_lossy() != "main.c").unwrap_or(false) {
+            if ent.path().extension().map(|e| e.to_string_lossy() == "c").unwrap_or(false) {
                 build.file(ent.path());
             }
         }
     }
-    build.compile("libhactool.a");
+    build.compile("libfatfs.a");
 
     let bindings = if let Ok(_) = std::env::var("BINDGEN_LIBNX") {
         bindgen::Builder::default()
@@ -25,33 +23,31 @@ fn main() {
             .clang_arg("-I/opt/devkitpro/libnx/include")
             .clang_arg("-I/opt/devkitpro/devkitA64/aarch64-none-elf/include")
             .clang_arg("-I/opt/devkitpro/devkitA64/lib/gcc/aarch64-none-elf/8.2.0/include")
-			.clang_arg("-Ihactool")
-			.clang_arg("-Ihactool/mbedtls/include")
+            .clang_arg("-Ifatfs/source")
             .header("wrapper.h")
-			.default_enum_style(bindgen::EnumVariation::Rust)
+            .default_enum_style(bindgen::EnumVariation::Rust)
             .blacklist_type("u8")
             .blacklist_type("u16")
             .blacklist_type("u32")
             .blacklist_type("u64")
             .blacklist_type("__va_list")
-			.blacklist_type("FILE")
+            .blacklist_type("FILE")
             .derive_default(true)
             .opaque_type("__.*")
-			.raw_line("pub type FILE = libc::FILE;")
+            .raw_line("pub type FILE = libc::FILE;")
             .generate()
-			.expect("Couldn't generate bindings!")
+            .expect("Couldn't generate bindings!")
     } else {
-		bindgen::Builder::default()
-			.clang_arg("-Ihactool")
-			.clang_arg("-Ihactool/mbedtls/include")
-			.header("wrapper.h")
-			.default_enum_style(bindgen::EnumVariation::Rust)
-			.blacklist_type("FILE")
+        bindgen::Builder::default()
+            .clang_arg("-Ifatfs/source")
+            .header("wrapper.h")
+            .default_enum_style(bindgen::EnumVariation::Rust)
+            .blacklist_type("FILE")
             .derive_default(true)
-			.raw_line("pub type FILE = libc::FILE;")
-			.generate()
-			.expect("Couldn't generate bindings!")
-	};
+            .raw_line("pub type FILE = libc::FILE;")
+            .generate()
+            .expect("Couldn't generate bindings!")
+    };
 
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
     bindings
