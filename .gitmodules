@@ -1,6 +1,0 @@
-[submodule "hactool"]
-	path = hactool
-	url = https://github.com/leo60228/hactool.git
-[submodule "fatfs"]
-	path = fatfs
-	url = https://github.com/abbrev/fatfs
