@@ -3,7 +3,13 @@
 #![allow(non_snake_case)]
 #![allow(improper_ctypes)]
 
+#[cfg(feature="create-bindings")]
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
+
+#[cfg(not(feature="create-bindings"))]
+mod bindings;
+#[cfg(not(feature="create-bindings"))]
+pub use bindings::*;
 
 #[repr(C)]
 pub enum DRESULT {

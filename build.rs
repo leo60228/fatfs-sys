@@ -5,6 +5,9 @@ use std::path::PathBuf;
 use std::fs::read_dir;
 
 fn main() {
+    if !cfg!(features="create-bindings") {
+        return;
+    }
     let mut build = cc::Build::new();
     build.warnings(false);
     build.include("fatfs/source");
@@ -33,6 +36,7 @@ fn main() {
             .blacklist_type("__va_list")
             .blacklist_type("FILE")
             .derive_default(true)
+            .layout_tests(false)
             .opaque_type("__.*")
             .raw_line("pub type FILE = libc::FILE;")
             .generate()
@@ -44,6 +48,7 @@ fn main() {
             .default_enum_style(bindgen::EnumVariation::Rust)
             .blacklist_type("FILE")
             .derive_default(true)
+            .layout_tests(false)
             .raw_line("pub type FILE = libc::FILE;")
             .generate()
             .expect("Couldn't generate bindings!")
